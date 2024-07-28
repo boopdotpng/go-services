@@ -1,49 +1,58 @@
--- where did this originate from?
-create type source_type as enum('discord', 'telegram');
--- type of incident for logs - wip
-create type incident_type as enum ('message_fail', 'image_pipeline_fail', 'other')
+-- create type source_type as enum('discord', 'telegram');
+CREATE TYPE source_type as ENUM ('discord', 'telegram');
 
--- an individual message
-create table messages (
-    id serial primary key,
-    message_id varchar(20) not null, -- discord or telegram id
-    source source_type not null,
-    user int not null references users(id), 
-    content text not null,
-    img_url text,  -- optional url to an image
-    conversation_id int not null references conversations(id),
-    message_sent_time timestamp(3) with time zone 'UTC', 
+-- type of incident for logs - wip
+CREATE TYPE incident_type as ENUM (
+    'message_fail',
+    'image_pipeline_fail',
+    'other'
 );
 
--- links discord and telegram users together
-create table users (
-    id serial primary key,
-    user_id varchar(20) not null, -- telegram user id, most likely. only one person on discord team responding but we will save either way
-    platform source_type not null,
-    profile_image text not null, -- url to profile image
+-- an individual message
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    discord_message_id BIGINT NOT NULL,  -- Discord message ID
+    telegram_message_id BIGINT,         -- Telegram message ID (optional)
+    source source_type NOT NULL,
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    content TEXT NOT NULL,
+    img_url TEXT,                       -- optional URL to an image
+    conversation_id INTEGER NOT NULL REFERENCES conversations(id),
+    message_sent_time TIMESTAMP(3) WITH TIME ZONE 'UTC' NOT NULL DEFAULT CURRENT_TIMESTAMP AT TIME
+ZONE 'UTC'
+);
+
+-- links Discord and Telegram users together
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    discord_user_id BIGINT,             -- Discord user ID (if applicable)
+    telegram_user_id BIGINT,            -- Telegram user ID (if applicable)
+    platform source_type NOT NULL,
+    profile_image TEXT NOT NULL         -- URL to profile image
 );
 
 -- store conversations (a thread of messages)
 CREATE TABLE conversations (
     id SERIAL PRIMARY KEY,
-    discord_channel_id VARCHAR(20), -- discord channel id for conversation
-    telegram_channel_id VARCHAR(20), -- telegram dm / channel id?
-    webhook_url VARCHAR(100) -- url for discord webhook (to post replies)
+    discord_conversation_id INTEGER,     -- Discord conversation ID (if applicable)
+    telegram_conversation_id INTEGER,    -- Telegram DM/Channel ID (if applicable)
+    webhook_url TEXT NOT NULL           -- URL for Discord webhook
 );
 
--- main queue table that the queue service processes messages from 
+-- main queue table that the queue service processes messages from
 CREATE TABLE queue (
     id SERIAL PRIMARY KEY,
-    retry_count INT NOT NULL, -- max 3 retries, log failure
-    enter_time TIMESTAMP(3) WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
-    message_id int not null references message(id)
+    retry_count INTEGER NOT NULL CHECK (retry_count <= 3),  -- max 3 retries, log failure
+    enter_time TIMESTAMP(3) WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP AT TIME ZONE 'UTC' NOT NULL,
+    message_id BIGINT NOT NULL REFERENCES messages(id)
 );
 
 -- work in progress - will elaborate on later
-create table logs (
-    id serial primary key,
-    incident_type enum not null,
-    error text not null,
-    source text not null,
-    detailObject text not null
+CREATE TABLE logs (
+    id SERIAL PRIMARY KEY,
+    incident_type incident_type NOT NULL,
+    error TEXT NOT NULL,
+    source TEXT NOT NULL,
+    detail_object TEXT NOT NULL,
+    occurred_at TIMESTAMP(3) WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP AT TIME ZONE 'UTC' NOT NULL
 );
