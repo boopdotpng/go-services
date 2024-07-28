@@ -1,3 +1,8 @@
-drop table if exists queue; 
-drop table if exists message;
-drop table if exists conversation;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS conversations;
+DROP TABLE IF EXISTS queue;
+DROP TABLE IF EXISTS logs;
+
+DROP TYPE IF EXISTS source_type;
+DROP TYPE IF EXISTS incident_type;
