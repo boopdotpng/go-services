@@ -7,7 +7,7 @@ All api endpoints are hosted on localhost:3000 by default.
 ```json
 data: {
     message_id: 12444,
-    source: "discord", // discord or telegram
+    source: "discord or telegram", 
     user_id: "",
     content: "",
     img_url: "",
@@ -31,8 +31,8 @@ data: {
 ```json
 data: {
     user_id: null,
-    platform: "", // discord or telegram
-    profile_image: "", // url to profile
+    platform: "discord or telegram", 
+    profile_image: "", 
 }
 ```
 
