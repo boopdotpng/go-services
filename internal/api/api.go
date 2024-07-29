@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -8,10 +10,12 @@ func healthcheck(c *fiber.Ctx) error {
 	return c.SendString("hello, world")
 }
 
-func StartAPI() {
+func StartAPI(port int) {
 	app := fiber.New()
 
 	app.Get("/healthcheck", healthcheck)
 
-	app.Listen(":3000")
+	localUrl := fmt.Sprintf(":%d", port)
+
+	app.Listen(localUrl)
 }

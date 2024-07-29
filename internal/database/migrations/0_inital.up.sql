@@ -11,12 +11,11 @@ CREATE TYPE incident_type as ENUM (
 -- an individual message
 CREATE TABLE messages (
     id SERIAL PRIMARY KEY,
-    discord_message_id BIGINT NOT NULL,  -- Discord message ID
-    telegram_message_id BIGINT,         -- Telegram message ID (optional)
+    message_id BIGINT, -- Telegram message ID (optional)
     source source_type NOT NULL,
     user_id BIGINT NOT NULL REFERENCES users(id),
     content TEXT NOT NULL,
-    img_url TEXT,                       -- optional URL to an image
+    img_url TEXT, -- optional URL to an image
     conversation_id INTEGER NOT NULL REFERENCES conversations(id),
     message_sent_time TIMESTAMP(3) WITH TIME ZONE 'UTC' NOT NULL DEFAULT CURRENT_TIMESTAMP AT TIME
 ZONE 'UTC'
@@ -25,24 +24,23 @@ ZONE 'UTC'
 -- links Discord and Telegram users together
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    discord_user_id BIGINT,             -- Discord user ID (if applicable)
-    telegram_user_id BIGINT,            -- Telegram user ID (if applicable)
+    user_id BIGINT, -- Discord or telegram user ID (if applicable)
     platform source_type NOT NULL,
-    profile_image TEXT NOT NULL         -- URL to profile image
+    profile_image TEXT NOT NULL -- URL to profile image
 );
 
 -- store conversations (a thread of messages)
 CREATE TABLE conversations (
     id SERIAL PRIMARY KEY,
-    discord_conversation_id INTEGER,     -- Discord conversation ID (if applicable)
-    telegram_conversation_id INTEGER,    -- Telegram DM/Channel ID (if applicable)
-    webhook_url TEXT NOT NULL           -- URL for Discord webhook
+    discord_conversation_id INTEGER, -- Discord conversation ID (if applicable)
+    telegram_conversation_id INTEGER, -- Telegram DM/Channel ID (if applicable)
+    webhook_url TEXT NOT NULL -- URL for Discord webhook
 );
 
 -- main queue table that the queue service processes messages from
 CREATE TABLE queue (
     id SERIAL PRIMARY KEY,
-    retry_count INTEGER NOT NULL CHECK (retry_count <= 3),  -- max 3 retries, log failure
+    retry_count INTEGER NOT NULL CHECK (retry_count <= 3), -- max 3 retries, log failure
     enter_time TIMESTAMP(3) WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP AT TIME ZONE 'UTC' NOT NULL,
     message_id BIGINT NOT NULL REFERENCES messages(id)
 );

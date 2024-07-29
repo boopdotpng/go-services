@@ -1,5 +1,5 @@
 # Makefile
-BINARY_NAME=myproject
+BINARY_NAME=telegramsync
 BUILD_DIR=$(CURDIR)/build
 
 .PHONY: all build clean run test lint

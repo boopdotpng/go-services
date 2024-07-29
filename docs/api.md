@@ -1,23 +1,58 @@
 ## api service endpoints
 
-All api endpoints are hosted on localhost:3000 by default. You can change this by passing --api-port as a command line option.
+All api endpoints are hosted on localhost:3000 by default.
 
-### get_count
+### post: /create/message
 
-Returns the number of messages currently in the queue
+```json
+data: {
+    message_id: 12444,
+    source: "discord", // discord or telegram
+    user_id: "",
+    content: "",
+    img_url: "",
+    conversation_id: 2134,
+    current_time: "2024-07-28T22:32:02Z",
+}
+```
 
-### add
+### post: /create/conversation
 
-Adds a message to the queue
+```json
+data: {
+    webhook_url: "",
+    telegram_conversation_id: "",
+    discord_conversation_id: "",
+}
+```
 
-### consume
+### post: /create/user
 
-Consumes a message from the queue
+```json
+data: {
+    user_id: null,
+    platform: "", // discord or telegram
+    profile_image: "", // url to profile
+}
+```
 
-### inc_retry
+### get: /search/user
 
-Increments the retry count of the queue object (max. 3)
+Mostly used to check if a user exists
 
-### add_failure
+```json
+data: {
+    userId: 1234,
+}
+```
 
-Logs message failure and adds queue to failed list
+### get /search/conversations
+
+```json
+data: {
+    id: 69,
+    discord_conversation_id: 1234,
+    telegram_conversation_id: 1234,
+    webhook_url: "",
+}
+```
